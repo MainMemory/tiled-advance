@@ -6,6 +6,7 @@ const interactableTable = 0xD4C84;
 const itemTable = 0xD4D0C;
 const enemyTable = 0xD4D94;
 const ringTable = 0xD4BFC;
+const startTable = 0xD6374;
 
 var getROMFile = function()
 {
@@ -191,6 +192,11 @@ var getLevelInfo = function(data, zone, act)
 	ptr = getPointer(data, ringTable + scn * 4);
 	if (ptr != 0)
 		result.rings = getRingData(data, ptr);
+	ptr = startTable + scn * 4;
+	result.start = {
+		x: data.getUint16(ptr, true),
+		y: data.getUint16(ptr + 2, true)
+	};
 	return result;
 }
 
