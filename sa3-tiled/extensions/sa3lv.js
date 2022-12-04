@@ -122,6 +122,81 @@ var sa3lvMapFormat = {
 		if (lvinf.foregroundHigh != null)
 			tilemap.addLayer(readForegroundLayer("Foreground High", data, lvinf.foregroundHigh, tileset));
 
+		var layer = new ObjectGroup("Objects");
+
+		if (lvinf.start != null) {
+			var obj = new MapObject();
+			obj.className = "Player";
+			obj.shape = MapObject.Point;
+			obj.x = lvinf.start.x;
+			obj.y = lvinf.start.y;
+			layer.addObject(obj);
+		}
+
+		if (lvinf.interactables != null) {
+			var lst = lvinf.interactables;
+			for (var i = 0; i < lst.length; ++i) {
+				var obj = new MapObject();
+				obj.className = "Interactable";
+				obj.shape = MapObject.Point;
+				obj.x = lst[i].x;
+				obj.y = lst[i].y;
+				obj.setProperty("Type", lst[i].index);
+				obj.setProperty("Data 1", lst[i].data1);
+				obj.setProperty("Data 2", lst[i].data2);
+				obj.setProperty("Data 3", lst[i].data3);
+				obj.setProperty("Data 4", lst[i].data4);
+				obj.setProperty("Data 5", lst[i].data5);
+				layer.addObject(obj);
+			}
+		}
+
+		if (lvinf.items != null) {
+			var lst = lvinf.items;
+			for (var i = 0; i < lst.length; ++i) {
+				var obj = new MapObject();
+				obj.className = "Item";
+				obj.shape = MapObject.Point;
+				obj.x = lst[i].x;
+				obj.y = lst[i].y;
+				obj.setProperty("Type", lst[i].index);
+				obj.setProperty("Data", lst[i].data);
+				layer.addObject(obj);
+			}
+		}
+
+		if (lvinf.enemies != null) {
+			var lst = lvinf.enemies;
+			for (var i = 0; i < lst.length; ++i) {
+				var obj = new MapObject();
+				obj.className = "Enemy";
+				obj.shape = MapObject.Point;
+				obj.x = lst[i].x;
+				obj.y = lst[i].y;
+				obj.setProperty("Type", lst[i].index);
+				obj.setProperty("Data 1", lst[i].data1);
+				obj.setProperty("Data 2", lst[i].data2);
+				obj.setProperty("Data 3", lst[i].data3);
+				obj.setProperty("Data 4", lst[i].data4);
+				obj.setProperty("Data 5", lst[i].data5);
+				layer.addObject(obj);
+			}
+		}
+
+		if (lvinf.rings != null) {
+			var lst = lvinf.rings;
+			for (var i = 0; i < lst.length; ++i) {
+				var obj = new MapObject();
+				obj.className = "Ring";
+				obj.shape = MapObject.Point;
+				obj.x = lst[i].x;
+				obj.y = lst[i].y;
+				layer.addObject(obj);
+			}
+		}
+
+		tilemap.addLayer(layer);
+
 		return tilemap;
 	},
 

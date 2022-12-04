@@ -2,6 +2,12 @@ var projpath = FileInfo.cleanPath(FileInfo.joinPaths(FileInfo.path(FileInfo.from
 var romtxt = FileInfo.joinPaths(projpath, "romfile.txt");
 const baseOffset = 0x8000000;
 const levelTable = 0xD0624;
+const collisionTable = 0xD0D78;
+const interactableTable = 0xD0E9C;
+const itemTable = 0xD0FC0;
+const enemyTable = 0xD10E4;
+const ringTable = 0xCEBD0;
+const startTable = 0xD13C8;
 
 var getROMFile = function()
 {
@@ -58,22 +64,146 @@ var getBackgroundInfo = function(data, address)
 	};
 }
 
+var getInteractableData = function(data, address)
+{
+	var dat2 = new DataView(decompressRLData(data, address));
+	var width = dat2.getUint32(4, true);
+	var height = dat2.getUint32(8, true);
+	var result = new Array();
+	for (var ry = 0; ry < height; ++ry) {
+		for (var rx = 0; rx < width; ++rx) {
+			var off = dat2.getUint32(0xC + ((ry * width) + rx) * 4, true);
+			if (off != 0) {
+				off += 4;
+				while (dat2.getUint8(off) != 0xFF) {
+					result.push({
+						x: dat2.getUint8(off++) * 8 + rx * 256,
+						y: dat2.getUint8(off++) * 8 + ry * 256,
+						index: dat2.getUint8(off++),
+						data1: dat2.getUint8(off++),
+						data2: dat2.getUint8(off++),
+						data3: dat2.getUint8(off++),
+						data4: dat2.getUint8(off++),
+						data5: dat2.getUint8(off++)
+					});
+				}
+			}
+		}
+	}
+	return result;
+}
+
+var getItemData = function(data, address)
+{
+	var dat2 = new DataView(decompressRLData(data, address));
+	var width = dat2.getUint32(4, true);
+	var height = dat2.getUint32(8, true);
+	var result = new Array();
+	for (var ry = 0; ry < height; ++ry) {
+		for (var rx = 0; rx < width; ++rx) {
+			var off = dat2.getUint32(0xC + ((ry * width) + rx) * 4, true);
+			if (off != 0) {
+				off += 4;
+				while (dat2.getUint8(off) != 0xFF) {
+					result.push({
+						x: dat2.getUint8(off++) * 8 + rx * 256,
+						y: dat2.getUint8(off++) * 8 + ry * 256,
+						index: dat2.getUint8(off++)
+					});
+				}
+			}
+		}
+	}
+	return result;
+}
+
+var getEnemyData = function(data, address)
+{
+	var dat2 = new DataView(decompressRLData(data, address));
+	var width = dat2.getUint32(4, true);
+	var height = dat2.getUint32(8, true);
+	var result = new Array();
+	for (var ry = 0; ry < height; ++ry) {
+		for (var rx = 0; rx < width; ++rx) {
+			var off = dat2.getUint32(0xC + ((ry * width) + rx) * 4, true);
+			if (off != 0) {
+				off += 4;
+				while (dat2.getUint8(off) != 0xFF) {
+					result.push({
+						x: dat2.getUint8(off++) * 8 + rx * 256,
+						y: dat2.getUint8(off++) * 8 + ry * 256,
+						index: dat2.getUint8(off++),
+						data1: dat2.getUint8(off++),
+						data2: dat2.getUint8(off++),
+						data3: dat2.getUint8(off++),
+						data4: dat2.getUint8(off++),
+						data5: dat2.getUint8(off++)
+					});
+				}
+			}
+		}
+	}
+	return result;
+}
+
+var getRingData = function(data, address)
+{
+	var dat2 = new DataView(decompressRLData(data, address));
+	var width = dat2.getUint32(4, true);
+	var height = dat2.getUint32(8, true);
+	var result = new Array();
+	for (var ry = 0; ry < height; ++ry) {
+		for (var rx = 0; rx < width; ++rx) {
+			var off = dat2.getUint32(0xC + ((ry * width) + rx) * 4, true);
+			if (off != 0) {
+				off += 4;
+				while (dat2.getUint8(off) != 0xFF) {
+					result.push({
+						x: dat2.getUint8(off++) * 8 + rx * 256,
+						y: dat2.getUint8(off++) * 8 + ry * 256
+					});
+				}
+			}
+		}
+	}
+	return result;
+}
+
 var getLevelInfo = function(data, zone, act)
 {
-	var addr = levelTable + ((zone * 10 + act) * 0x10);
+	var scn = zone * 10 + act;
+	var addr = levelTable + scn * 0x10;
 	var result = {};
 	var ptr = getPointer(data, addr);
 	if (ptr != 0)
 		result.foregroundHigh = getLayerInfo(data, ptr);
-	var ptr = getPointer(data, addr + 4);
+	ptr = getPointer(data, addr + 4);
 	if (ptr != 0)
 		result.foregroundLow = getLayerInfo(data, ptr);
-	var ptr = getPointer(data, addr + 8);
+	ptr = getPointer(data, addr + 8);
 	if (ptr != 0)
 		result.background1 = getBackgroundInfo(data, ptr);
-	var ptr = getPointer(data, addr + 0xC);
+	ptr = getPointer(data, addr + 0xC);
 	if (ptr != 0)
 		result.background2 = getBackgroundInfo(data, ptr);
+	ptr = getPointer(data, interactableTable + scn * 4);
+	if (ptr != 0)
+		result.interactables = getInteractableData(data, ptr);
+	ptr = getPointer(data, itemTable + scn * 4);
+	if (ptr != 0)
+		result.items = getItemData(data, ptr);
+	ptr = getPointer(data, enemyTable + scn * 4);
+	if (ptr != 0)
+		result.enemies = getEnemyData(data, ptr);
+	ptr = getPointer(data, ringTable + scn * 4);
+	if (ptr != 0)
+		result.rings = getRingData(data, ptr);
+	ptr = getPointer(data, startTable + scn * 4);
+	if (ptr != 0)
+		result.start = {
+			x: data.getUint16(ptr, true),
+			y: data.getUint16(ptr + 2, true)
+		};
 	return result;
 }
 
@@ -152,4 +282,31 @@ var readPalette = function(data, info, palette)
 		if ((pi + info.palDest) & 0xF)
 			palette[pi] |= 0xFF000000;
 	}
+}
+
+var decompressRLData = function(data, address)
+{
+	var head = data.getUint32(address, true);
+	address += 4;
+	if ((head & 0xFF) != 0x30)
+		return null;
+	var size = head >> 8;
+	var dst = new Uint8Array(size);
+	var off = 0;
+	while (off < size)
+	{
+		var flag = data.getUint8(address++);
+		if ((flag & 0x80) == 0x80) {
+			var cnt = (flag & 0x7F) + 3;
+			var val = data.getUint8(address++);
+			for (var i = 0; i < cnt; ++i)
+				dst[off++] = val;
+		}
+		else {
+			var cnt = flag + 1;
+			for (var i = 0; i < cnt; ++i)
+				dst[off++] = data.getUint8(address++);
+		}
+	}
+	return dst.buffer;
 }
