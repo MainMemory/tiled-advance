@@ -150,7 +150,6 @@ var sa2lvMapFormat = {
 				obj.x = lst[i].x;
 				obj.y = lst[i].y;
 				obj.setProperty("Type", lst[i].index);
-				obj.setProperty("Data", lst[i].data);
 				layer.addObject(obj);
 			}
 		}
